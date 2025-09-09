@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Passwordaty</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Passwordaty</h1>
+    <div class="muted">تطبيق محلي لحفظ كلمات المرور (HTML/CSS/JS) — يعمل أوفلاين</div>
+  </header>
+  <section id="loginView" class="card">
+    <h2>تسجيل الدخول</h2>
+    <div class="row wrap" style="margin-top:10px">
+      <input id="email" class="input" placeholder="البريد الإلكتروني" />
+      <input id="password" type="password" class="input" placeholder="كلمة السر (8 أحرف على الأقل)" />
+      <button id="btnLogin" class="btn">دخول</button>
+      <button id="btnSignup" class="btn secondary">إنشاء حساب</button>
+    </div>
+    <div id="loginError" class="error" style="margin-top:8px"></div>
+    <div class="footer">البيانات تُحفظ مشفّرة محليًا في المتصفح.</div>
+  </section>
+  <section id="mainView" class="hidden">
+    <div class="card">
+      <div class="row wrap">
+        <h2 style="margin-bottom:0">مجلداتي</h2>
+        <div class="actions">
+          <button id="btnAddFolder" class="btn green">+ إضافة مجلد</button>
+          <button id="btnBackup" class="btn secondary">نسخ احتياطي</button>
+          <button id="btnRestore" class="btn secondary">استعادة</button>
+          <button id="btnLogout" class="btn red">تسجيل خروج</button>
+        </div>
+      </div>
+      <div id="foldersGrid" class="grid"></div>
+    </div>
+  </section>
+  <input id="fileRestore" type="file" accept=".json,.pwbk" class="hidden" />
+</div>
+<script src="app.js"></script>
+</body>
+</html>
