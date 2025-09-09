@@ -14,7 +14,6 @@
       <span id="userTag" class="tag hidden"></span>
     </header>
 
-    <!-- Login -->
     <section id="loginView" class="card">
       <h2>تسجيل الدخول السحابي</h2>
       <div class="row wrap" style="margin-top:10px">
@@ -26,7 +25,6 @@
       <div id="loginError" class="error" style="margin-top:8px"></div>
     </section>
 
-    <!-- Main -->
     <section id="mainView" class="hidden">
       <div class="card">
         <div class="row wrap">
@@ -54,21 +52,20 @@
     </section>
   </div>
 
-  <!-- Firebase SDK (compat) -->
+  <!-- Firebase compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script>
-    // مفاتيح مشروعك الحقيقية
     const firebaseConfig = {
-      apiKey: "AIzaSyBqJs-Vi13l91AzMo_6NNyEPZW2HNGbH0",
-      authDomain: "passwordaty.firebaseapp.com",
-      projectId: "passwordaty",
-      storageBucket: "passwordaty.appspot.com",
-      messagingSenderId: "50790211539",
-      appId: "1:50790211539:web:d93f1a2cd59b849a345926",
-      measurementId: "G-VBQ04JVZS1"
-    };
+  apiKey: "AIzaSyBgJqS-Vil3l9lAzMO_6NNYePZW2HNGbH0",
+  authDomain: "passwordaty.firebaseapp.com",
+  projectId: "passwordaty",
+  storageBucket: "passwordaty.firebasestorage.app",
+  messagingSenderId: "50790211539",
+  appId: "1:50790211539:web:d93f1a2cd59b849a345926",
+  measurementId: "G-VBQQ4JVZS1"
+};
     firebase.initializeApp(firebaseConfig);
     window.FB = { auth: firebase.auth(), db: firebase.firestore() };
   </script>
