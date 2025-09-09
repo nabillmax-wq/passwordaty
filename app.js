@@ -1,11 +1,49 @@
-// نسخة مبسطة — تخزين محلي فقط
-let currentUser=null,vault={folders:[],entries:[]};
-function el(id){return document.getElementById(id)}
-function show(id){el(id).classList.remove('hidden')}
-function hide(id){el(id).classList.add('hidden')}
-el('btnSignup').onclick=function(){alert('تم إنشاء الحساب (محلي فقط).')}
-el('btnLogin').onclick=function(){currentUser={email:el('email').value};hide('loginView');show('mainView');}
-el('btnLogout').onclick=function(){currentUser=null;hide('mainView');show('loginView');}
-el('btnAddFolder').onclick=function(){alert('ميزة إضافة مجلدات في النسخة المبسطة.')}
-el('btnBackup').onclick=function(){alert('ميزة النسخ الاحتياطي قيد التطوير.')}
-el('btnRestore').onclick=function(){alert('ميزة الاستعادة قيد التطوير.')}
+document.addEventListener("DOMContentLoaded", () => {
+  const loginView = document.getElementById("loginView");
+  const mainView = document.getElementById("mainView");
+  const btnLogin = document.getElementById("btnLogin");
+  const btnSignup = document.getElementById("btnSignup");
+  const btnLogout = document.getElementById("btnLogout");
+
+  btnLogin.onclick = async () => {
+    const email = document.getElementById("email").value;
+    const pass = document.getElementById("password").value;
+    try {
+      await FB.auth.signInWithEmailAndPassword(email, pass);
+      showMain();
+    } catch (err) {
+      alert("خطأ: " + err.message);
+    }
+  };
+
+  btnSignup.onclick = async () => {
+    const email = document.getElementById("email").value;
+    const pass = document.getElementById("password").value;
+    try {
+      await FB.auth.createUserWithEmailAndPassword(email, pass);
+      showMain();
+    } catch (err) {
+      alert("خطأ: " + err.message);
+    }
+  };
+
+  btnLogout.onclick = async () => {
+    await FB.auth.signOut();
+    loginView.classList.remove("hidden");
+    mainView.classList.add("hidden");
+  };
+
+  function showMain() {
+    loginView.classList.add("hidden");
+    mainView.classList.remove("hidden");
+  }
+
+  FB.auth.onAuthStateChanged(user => {
+    if (user) {
+      showMain();
+    } else {
+      loginView.classList.remove("hidden");
+      mainView.classList.add("hidden");
+    }
+  });
+});
