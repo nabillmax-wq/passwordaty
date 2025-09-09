@@ -3,37 +3,63 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Passwordaty</title>
+  <title>Passwordaty — Firebase</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="app">
-    <header>
+    <header class="row">
       <h1>Passwordaty</h1>
-      <div class="muted">تطبيق لحفظ كلمات المرور مع ربط Firebase</div>
+      <div class="spacer"></div>
+      <span id="userTag" class="tag hidden"></span>
     </header>
 
+    <!-- Login -->
     <section id="loginView" class="card">
-      <h2>تسجيل الدخول</h2>
-      <input id="email" placeholder="البريد الإلكتروني" />
-      <input id="password" type="password" placeholder="كلمة السر" />
-      <button id="btnLogin">دخول</button>
-      <button id="btnSignup">إنشاء حساب</button>
+      <h2>تسجيل الدخول السحابي</h2>
+      <div class="row wrap" style="margin-top:10px">
+        <input id="email" class="input" placeholder="البريد الإلكتروني" />
+        <input id="password" type="password" class="input" placeholder="كلمة السر (6 أحرف على الأقل)" />
+        <button id="btnLogin" class="btn">دخول</button>
+        <button id="btnSignup" class="btn secondary">إنشاء حساب</button>
+      </div>
+      <div id="loginError" class="error" style="margin-top:8px"></div>
     </section>
 
+    <!-- Main -->
     <section id="mainView" class="hidden">
-      <h2>مجلداتي</h2>
-      <button id="btnLogout">تسجيل خروج</button>
-      <div id="foldersGrid"></div>
+      <div class="card">
+        <div class="row wrap">
+          <h2 style="margin-bottom:0">مجلداتي</h2>
+          <div class="spacer"></div>
+          <div class="actions">
+            <button id="btnAddFolder" class="btn green">+ إضافة مجلد</button>
+            <button id="btnLogout" class="btn red">تسجيل خروج</button>
+          </div>
+        </div>
+        <div id="foldersGrid" class="grid"></div>
+      </div>
+
+      <div id="entriesPanel" class="card hidden" style="margin-top:16px">
+        <div class="row wrap">
+          <h2 id="entriesTitle" style="margin-bottom:0">الحسابات</h2>
+          <div class="spacer"></div>
+          <div class="actions">
+            <button id="btnAddEntry" class="btn green">+ إضافة حساب</button>
+            <button id="btnCloseFolder" class="btn secondary">رجوع للمجلدات</button>
+          </div>
+        </div>
+        <div id="entriesGrid" class="grid" style="margin-top:12px"></div>
+      </div>
     </section>
   </div>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase SDK (compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
   <script>
+    // مفاتيح مشروعك الحقيقية
     const firebaseConfig = {
       apiKey: "AIzaSyBqJs-Vi13l91AzMo_6NNyEPZW2HNGbH0",
       authDomain: "passwordaty.firebaseapp.com",
@@ -43,14 +69,9 @@
       appId: "1:50790211539:web:d93f1a2cd59b849a345926",
       measurementId: "G-VBQ04JVZS1"
     };
-
     firebase.initializeApp(firebaseConfig);
-    window.FB = {
-      auth: firebase.auth(),
-      db: firebase.firestore()
-    };
+    window.FB = { auth: firebase.auth(), db: firebase.firestore() };
   </script>
-
   <script src="app.js"></script>
 </body>
 </html>
