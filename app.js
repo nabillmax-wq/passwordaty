@@ -1,6 +1,8 @@
-// تهيئة Firebase عبر compat SDK (أنسب للصفحات الثابتة)
+// تهيئة Firebase عبر compat SDK (أنسب للصفحات الثابتة).
+const API_KEY = (window && window.PASSWORDATY_API_KEY) ? window.PASSWORDATY_API_KEY.trim() : "";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyB7HnwfiV8EPdi7QWDc8cd2muFjLJhQVZc",
+  apiKey: API_KEY,
   authDomain: "passwordaty.firebaseapp.com",
   projectId: "passwordaty",
   storageBucket: "passwordaty.appspot.com",
@@ -23,15 +25,16 @@ document.getElementById('btnLogin').addEventListener('click', login);
 document.getElementById('btnSignup').addEventListener('click', signup);
 document.getElementById('btnLogout').addEventListener('click', logout);
 
-// رسائل عربية شائعة
 const AR_ERRORS = {
+  'auth/invalid-api-key': 'مفتاح الـ API غير صالح — استخدم Web API Key الخاص بمشروع Firebase.',
+  'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'مفتاح الـ API غير صالح — استخدم Web API Key الخاص بمشروع Firebase.',
   'auth/invalid-email': 'صيغة البريد الإلكتروني غير صالحة.',
   'auth/missing-password': 'أدخل كلمة المرور.',
   'auth/wrong-password': 'كلمة المرور غير صحيحة.',
   'auth/user-not-found': 'لا يوجد مستخدم بهذا البريد.',
   'auth/email-already-in-use': 'البريد الإلكتروني مستخدم مسبقًا.',
   'auth/weak-password': 'كلمة المرور ضعيفة؛ استخدم 6 أحرف على الأقل.',
-  'auth/configuration-not-found': 'لم يتم تفعيل طريقة الدخول أو الدومين غير مصرح به.'
+  'auth/configuration-not-found': 'تحقق من تفعيل طريقة الدخول ومن إضافة الدومين في Authorized domains.'
 };
 
 function showMsg(text, ok=false){
@@ -39,7 +42,6 @@ function showMsg(text, ok=false){
   msgEl.className = 'msg ' + (ok ? 'ok' : 'err');
 }
 
-// تسجيل الدخول
 function login(){
   const email = emailEl.value.trim();
   const pass  = passEl.value;
@@ -48,7 +50,6 @@ function login(){
     .catch(e => showMsg(AR_ERRORS[e.code] || e.message));
 }
 
-// إنشاء حساب
 function signup(){
   const email = emailEl.value.trim();
   const pass  = passEl.value;
@@ -57,12 +58,10 @@ function signup(){
     .catch(e => showMsg(AR_ERRORS[e.code] || e.message));
 }
 
-// تسجيل خروج
 function logout(){
   auth.signOut().catch(e => showMsg(AR_ERRORS[e.code] || e.message));
 }
 
-// مراقبة حالة المستخدم لإظهار/إخفاء البطاقات
 auth.onAuthStateChanged(user => {
   if (user){
     userEmail.textContent = user.email || '';
