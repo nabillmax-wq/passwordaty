@@ -1,75 +1,98 @@
-// تهيئة Firebase عبر compat SDK (أنسب للصفحات الثابتة).
-const API_KEY = (window && window.PASSWORDATY_API_KEY) ? window.PASSWORDATY_API_KEY.trim() : "";
-
+// تهيئة Firebase باستخدام COMPAT SDK عبر CDN (لا نحتاج أدوات بناء)
+// ✅ ملاحظة مهمة: تم تصحيح storageBucket إلى appspot.com
 const firebaseConfig = {
-  apiKey: API_KEY,
+  apiKey: "AIzaSyBgJqS-Vil3l9lAzMO_6NNYePZW2HNGbH0",
   authDomain: "passwordaty.firebaseapp.com",
   projectId: "passwordaty",
-  storageBucket: "passwordaty.appspot.com",
+  storageBucket: "passwordaty.appspot.com", // ✅ التصحيح هنا
   messagingSenderId: "50790211539",
   appId: "1:50790211539:web:d93f1a2cd59b849a345926",
+  measurementId: "G-VBQQ4JVZS1"
 };
 
+// Initialize
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
+// حفظ الجلسة محليًا
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
 // عناصر الواجهة
-const emailEl = document.getElementById('email');
-const passEl  = document.getElementById('password');
-const msgEl   = document.getElementById('msg');
+const email = document.getElementById('email');
+const password = document.getElementById('password');
+const btnLogin = document.getElementById('btnLogin');
+const btnSignup = document.getElementById('btnSignup');
+const btnLogout = document.getElementById('btnLogout');
+const msg = document.getElementById('msg');
+
 const authCard = document.getElementById('authCard');
-const userCard = document.getElementById('userCard');
-const userEmail = document.getElementById('userEmail');
+const welcomeCard = document.getElementById('welcomeCard');
+const welcomeTitle = document.getElementById('welcomeTitle');
 
-document.getElementById('btnLogin').addEventListener('click', login);
-document.getElementById('btnSignup').addEventListener('click', signup);
-document.getElementById('btnLogout').addEventListener('click', logout);
-
-const AR_ERRORS = {
-  'auth/invalid-api-key': 'مفتاح الـ API غير صالح — استخدم Web API Key الخاص بمشروع Firebase.',
-  'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'مفتاح الـ API غير صالح — استخدم Web API Key الخاص بمشروع Firebase.',
-  'auth/invalid-email': 'صيغة البريد الإلكتروني غير صالحة.',
-  'auth/missing-password': 'أدخل كلمة المرور.',
-  'auth/wrong-password': 'كلمة المرور غير صحيحة.',
-  'auth/user-not-found': 'لا يوجد مستخدم بهذا البريد.',
-  'auth/email-already-in-use': 'البريد الإلكتروني مستخدم مسبقًا.',
-  'auth/weak-password': 'كلمة المرور ضعيفة؛ استخدم 6 أحرف على الأقل.',
-  'auth/configuration-not-found': 'تحقق من تفعيل طريقة الدخول ومن إضافة الدومين في Authorized domains.'
-};
-
-function showMsg(text, ok=false){
-  msgEl.textContent = text;
-  msgEl.className = 'msg ' + (ok ? 'ok' : 'err');
+// عرض رسالة
+function showMsg(text, isError = true){
+  msg.textContent = text || '';
+  msg.style.color = isError ? '#E74C3C' : '#27AE60';
 }
 
-function login(){
-  const email = emailEl.value.trim();
-  const pass  = passEl.value;
-  auth.signInWithEmailAndPassword(email, pass)
-    .then(() => showMsg('تم تسجيل الدخول بنجاح ✅', true))
-    .catch(e => showMsg(AR_ERRORS[e.code] || e.message));
-}
-
-function signup(){
-  const email = emailEl.value.trim();
-  const pass  = passEl.value;
-  auth.createUserWithEmailAndPassword(email, pass)
-    .then(() => showMsg('تم إنشاء الحساب بنجاح 🎉', true))
-    .catch(e => showMsg(AR_ERRORS[e.code] || e.message));
-}
-
-function logout(){
-  auth.signOut().catch(e => showMsg(AR_ERRORS[e.code] || e.message));
-}
-
-auth.onAuthStateChanged(user => {
-  if (user){
-    userEmail.textContent = user.email || '';
+// تبديل الواجهات بحسب حالة المستخدم
+auth.onAuthStateChanged((user)=>{
+  if(user){
     authCard.classList.add('hidden');
-    userCard.classList.remove('hidden');
+    welcomeCard.classList.remove('hidden');
+    const name = user.email || 'مستخدم';
+    welcomeTitle.textContent = `مرحبًا ${name}`;
     showMsg('');
   }else{
-    userCard.classList.add('hidden');
+    welcomeCard.classList.add('hidden');
     authCard.classList.remove('hidden');
   }
 });
+
+// دخول
+btnLogin.addEventListener('click', async ()=>{
+  try{
+    if(!email.value || !password.value) return showMsg('الرجاء إدخال البريد وكلمة السر');
+    await auth.signInWithEmailAndPassword(email.value.trim(), password.value);
+    showMsg('تم تسجيل الدخول بنجاح', false);
+  }catch(e){
+    showMsg(parseAuthError(e));
+  }
+});
+
+// إنشاء حساب
+btnSignup.addEventListener('click', async ()=>{
+  try{
+    if(!email.value || !password.value) return showMsg('الرجاء إدخال البريد وكلمة السر');
+    await auth.createUserWithEmailAndPassword(email.value.trim(), password.value);
+    showMsg('تم إنشاء الحساب وتسجيل الدخول', false);
+  }catch(e){
+    showMsg(parseAuthError(e));
+  }
+});
+
+// خروج
+btnLogout.addEventListener('click', async ()=>{
+  try{
+    await auth.signOut();
+  }catch(e){
+    showMsg(parseAuthError(e));
+  }
+});
+
+// تحويل أخطاء Firebase لرسائل ودّية
+function parseAuthError(e){
+  const code = (e && e.code) || '';
+  switch(code){
+    case 'auth/invalid-email': return 'عنوان البريد غير صحيح.';
+    case 'auth/user-disabled': return 'تم تعطيل هذا الحساب.';
+    case 'auth/user-not-found': return 'لا يوجد مستخدم بهذا البريد.';
+    case 'auth/wrong-password': return 'كلمة السر غير صحيحة.';
+    case 'auth/email-already-in-use': return 'هذا البريد مستخدم مسبقًا.';
+    case 'auth/weak-password': return 'كلمة السر ضعيفة (6 أحرف على الأقل).';
+    case 'auth/network-request-failed': return 'مشكلة في الشبكة. حاول مجددًا.';
+    default: 
+      if(String(e && e.message).includes('api-key') || String(e && e.message).includes('API key'))
+        return 'تحقق من Web API Key وإعدادات المشروع.';
+      return 'حدث خطأ: ' + (e && e.message ? e.message : 'غير معروف');
+  }
+}

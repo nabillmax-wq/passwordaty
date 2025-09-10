@@ -3,43 +3,44 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Passwordaty — تسجيل الدخول</title>
+  <title>Passwordaty</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Firebase compat SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script>
-    // تم إدراج Web API Key تلقائيًا لك
-    window.PASSWORDATY_API_KEY = "AlzaSyB7HnwfiV8EPdi7QWDc8cd2muFjLJhQVZc";
-  </script>
 </head>
 <body>
-  <main class="wrap">
-    <header class="hdr">
-      <h1>Passwordaty</h1>
-      <div class="sub">تسجيل الدخول السحابي (Firebase)</div>
-    </header>
+  <main class="container">
+    <h1 class="title">Passwordaty</h1>
+    <p class="subtitle">تسجيل الدخول السحابي (Firebase)</p>
 
-    <section id="authCard" class="card">
+    <section class="card" id="authCard">
       <div class="row">
-        <input id="email" type="email" placeholder="البريد الإلكتروني" autocomplete="username" />
-        <input id="password" type="password" placeholder="كلمة المرور" autocomplete="current-password" />
+        <input id="password" class="input" type="password" placeholder="كلمة السر" />
+        <input id="email" class="input" type="email" placeholder="البريد الإلكتروني" />
       </div>
-      <div class="row gap">
-        <button id="btnLogin" class="btn primary">دخول</button>
-        <button id="btnSignup" class="btn">إنشاء حساب</button>
+
+      <div class="actions">
+        <button id="btnSignup" class="btn secondary">إنشاء حساب</button>
+        <button id="btnLogin" class="btn">دخول</button>
       </div>
+
       <div id="msg" class="msg"></div>
     </section>
 
-    <section id="userCard" class="card hidden">
-      <div class="hello">مرحباً، <span id="userEmail"></span></div>
-      <p class="muted">تم تسجيل الدخول بنجاح. يمكنك الآن العودة للتطبيق.</p>
-      <button id="btnLogout" class="btn danger">تسجيل خروج</button>
+    <section class="card hidden" id="welcomeCard">
+      <h2 id="welcomeTitle">مرحبًا!</h2>
+      <p>تم تسجيل الدخول بنجاح 🎉</p>
+      <div class="actions">
+        <button id="btnLogout" class="btn red">تسجيل خروج</button>
+      </div>
     </section>
 
-    <footer class="foot">© 2025 Passwordaty — يعمل على GitHub Pages + Firebase</footer>
+    <footer class="footer">
+      يعمل على <span>Firebase</span> + <span>GitHub Pages</span> — <span>Passwordaty 2025 ©</span>
+    </footer>
   </main>
+
+  <!-- Firebase (Compat) via CDN -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
   <script src="app.js"></script>
 </body>
