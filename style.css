@@ -1,37 +1,29 @@
-body {
-  font-family: Tahoma, sans-serif;
-  background: #f5f7fa;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
+:root{
+  --bg:#f5f7fb; --card:#fff; --txt:#2E3A59;
+  --blue:#4A90E2; --green:#27AE60; --red:#E74C3C; --border:#d9e2f1;
 }
-.container {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  text-align: center;
-  width: 300px;
-}
-input {
-  display: block;
-  width: 90%;
-  margin: 10px auto;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-button {
-  margin: 5px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  background: #007BFF;
-  color: #fff;
-  cursor: pointer;
-}
-button:hover {
-  background: #0056b3;
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:"Tahoma","Segoe UI",sans-serif;line-height:1.6}
+.wrap{max-width:720px;margin:28px auto;padding:0 12px;display:flex;flex-direction:column;gap:14px}
+.hdr{text-align:center}
+.hdr h1{margin:.2rem 0}
+.sub{color:#5b6b8a;font-size:.95rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 6px 22px rgba(46,58,89,.08)}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+.row.gap{justify-content:center}
+input{flex:1;min-width:220px;padding:12px;border:1px solid var(--border);border-radius:10px;background:#fff;font-size:1rem}
+.btn{padding:10px 16px;border:none;border-radius:10px;cursor:pointer;background:#eef4ff;color:var(--txt);border:1px solid #cfe0ff;transition:.2s}
+.btn.primary{background:var(--blue);color:#fff;border-color:transparent}
+.btn.danger{background:var(--red);color:#fff;border-color:transparent}
+.btn:hover{opacity:.92;transform:translateY(-1px)}
+.msg{margin-top:10px;font-size:.95rem}
+.msg.err{color:var(--red)}
+.msg.ok{color:var(--green)}
+.hidden{display:none}
+.hello{font-weight:600;font-size:1.05rem;margin-bottom:8px}
+.muted{color:#6b7796}
+.foot{margin-top:8px;text-align:center;color:#7a88a8;font-size:.9rem}
+@media (max-width:420px){
+  .wrap{margin:16px auto}
 }

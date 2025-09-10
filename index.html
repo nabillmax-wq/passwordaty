@@ -1,24 +1,42 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Passwordaty</title>
-  <link rel="stylesheet" href="style.css">
-  <!-- Firebase compat SDK -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Passwordaty — تسجيل الدخول</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase compat SDKs (أنسب لصفحات ثابتة مثل GitHub Pages) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Passwordaty</h1>
-    <div id="auth">
-      <input type="email" id="email" placeholder="البريد الإلكتروني">
-      <input type="password" id="password" placeholder="كلمة المرور">
-      <button onclick="login()">دخول</button>
-      <button onclick="signup()">إنشاء حساب</button>
-    </div>
-  </div>
+  <main class="wrap">
+    <header class="hdr">
+      <h1>Passwordaty</h1>
+      <div class="sub">تسجيل الدخول السحابي (Firebase)</div>
+    </header>
+
+    <section id="authCard" class="card">
+      <div class="row">
+        <input id="email" type="email" placeholder="البريد الإلكتروني" autocomplete="username" />
+        <input id="password" type="password" placeholder="كلمة المرور" autocomplete="current-password" />
+      </div>
+      <div class="row gap">
+        <button id="btnLogin" class="btn primary">دخول</button>
+        <button id="btnSignup" class="btn">إنشاء حساب</button>
+      </div>
+      <div id="msg" class="msg"></div>
+    </section>
+
+    <section id="userCard" class="card hidden">
+      <div class="hello">مرحباً، <span id="userEmail"></span></div>
+      <p class="muted">تم تسجيل الدخول بنجاح. يمكنك الآن العودة للتطبيق.</p>
+      <button id="btnLogout" class="btn danger">تسجيل خروج</button>
+    </section>
+
+    <footer class="foot">© 2025 Passwordaty — يعمل على GitHub Pages + Firebase</footer>
+  </main>
+
   <script src="app.js"></script>
 </body>
 </html>
