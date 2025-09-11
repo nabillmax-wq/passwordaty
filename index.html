@@ -1,47 +1,282 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
+  <title>Passwordaty – خزنتي</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Passwordaty</title>
-  <link rel="stylesheet" href="style.css" />
+  
+  <!-- CryptoJS for AES encryption -->
+  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.js"></script>
+  
+  <style>
+    :root { --pri:#0a7; --pri2:#068; --bg:#f6f7f9; --card:#fff; --danger:#c0392b; }
+    * { box-sizing: border-box; }
+    body { font-family: Tahoma, Arial, sans-serif; direction: rtl; background: var(--bg ); margin: 0; padding: 24px; color: #222; }
+    h1 { margin-top: 0; text-align: center; }
+    section { max-width: 900px; margin: 16px auto; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    input, select, textarea, button { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; font-family: inherit; font-size: 1rem; }
+    textarea { min-height: 90px; resize: vertical; }
+    button { background: var(--pri); color: #fff; border: none; cursor: pointer; font-weight: bold; }
+    button:hover { background: var(--pri2); }
+    button.secondary { background: #777; }
+    button.danger { background: var(--danger); }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .card { background: var(--card); border-radius: 16px; padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.06); }
+    ul#itemsList { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+    .item { background: #fafafa; border: 1px solid #eee; border-radius: 12px; padding: 10px; }
+    .item .meta { font-size: .85rem; color: #666; word-wrap: break-word; }
+    .item code { background: #eee; padding: 2px 5px; border-radius: 4px; font-family: monospace; cursor: pointer; }
+    .hint { color: #666; font-size: .9rem; }
+    @media(max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
-  <main class="container">
-    <h1 class="title">Passwordaty</h1>
-    <p class="subtitle">تسجيل الدخول السحابي (Firebase)</p>
+  <h1>خزنة Passwordaty</h1>
 
-    <section class="card" id="authCard">
+  <!-- Auth -->
+  <section id="auth-section">
+    <h2>تسجيل الدخول</h2>
+    <input type="email" id="email" placeholder="البريد الإلكتروني" />
+    <input type="password" id="password" placeholder="كلمة المرور" />
+    <div class="row">
+      <button id="loginBtn">دخول</button>
+      <button id="signupBtn" class="secondary">إنشاء حساب</button>
+    </div>
+  </section>
+
+  <!-- Master password -->
+  <section id="master-section" style="display:none;">
+    <h2>كلمة المرور الرئيسية</h2>
+    <p class="hint">لن تُرفع للسيرفر، تُستخدم فقط للتشفير وفكّه محليًا.</p>
+    <input type="password" id="master" placeholder="أدخل كلمة المرور الرئيسية" />
+    <button id="setMasterBtn">متابعة</button>
+  </section>
+
+  <!-- Dashboard -->
+  <section id="dashboard" style="display:none;">
+    <div class="topbar">
+      <strong id="whoami"></strong>
       <div class="row">
-        <input id="password" class="input" type="password" placeholder="كلمة السر" />
-        <input id="email" class="input" type="email" placeholder="البريد الإلكتروني" />
+        <select id="filterCategory">
+          <option value="">كل الفئات</option>
+          <option>بنوك</option>
+          <option>تطبيقات</option>
+          <option>مواقع</option>
+          <option>بطاقات</option>
+          <option>أخرى</option>
+        </select>
+        <input id="search" placeholder="بحث داخل العناصر…" />
+        <button id="logoutBtn" class="danger">خروج</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>إضافة عنصر</h3>
+        <input id="itemTitle" placeholder="اسم الحساب (مثلاً: بنك الراجحي)" />
+        <input id="itemUser" placeholder="اسم المستخدم / البريد" />
+        <input id="itemPass" placeholder="كلمة المرور" />
+        <textarea id="itemNote" placeholder="ملاحظات (اختياري)"></textarea>
+        <select id="itemCat">
+          <option>بنوك</option>
+          <option>تطبيقات</option>
+          <option>مواقع</option>
+          <option>بطاقات</option>
+          <option>أخرى</option>
+        </select>
+        <button id="addItemBtn">حفظ</button>
       </div>
 
-      <div class="actions">
-        <button id="btnSignup" class="btn secondary">إنشاء حساب</button>
-        <button id="btnLogin" class="btn">دخول</button>
+      <div class="card">
+        <h3>عناصري</h3>
+        <ul id="itemsList"></ul>
       </div>
+    </div>
+  </section>
 
-      <div id="msg" class="msg"></div>
-    </section>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { 
+      getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { 
+      getFirestore, collection, addDoc, query, orderBy, onSnapshot 
+    } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
-    <section class="card hidden" id="welcomeCard">
-      <h2 id="welcomeTitle">مرحبًا!</h2>
-      <p>تم تسجيل الدخول بنجاح 🎉</p>
-      <div class="actions">
-        <button id="btnLogout" class="btn red">تسجيل خروج</button>
-      </div>
-    </section>
+    // === إعدادات Firebase الخاصة بمشروعك (تم التحديث ) ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyApEV7dse7szZtKoo3M7u8lexD4qcivM5c",
+      authDomain: "nabillmax-1ec98.firebaseapp.com",
+      projectId: "nabillmax-1ec98",
+      storageBucket: "nabillmax-1ec98.appspot.com", // Corrected value
+      messagingSenderId: "1088959582431",
+      appId: "1:1088959582431:web:7814b350b02175789c196a",
+      measurementId: "G-D164EXZHFY"
+    };
 
-    <footer class="footer">
-      يعمل على <span>Firebase</span> + <span>GitHub Pages</span> — <span>Passwordaty 2025 ©</span>
-    </footer>
-  </main>
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-  <!-- Firebase (Compat) via CDN -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    // DOM elements
+    const authSection = document.getElementById("auth-section");
+    const masterSection = document.getElementById("master-section");
+    const dashboard = document.getElementById("dashboard");
+    const loginBtn = document.getElementById("loginBtn");
+    const signupBtn = document.getElementById("signupBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const setMasterBtn = document.getElementById("setMasterBtn");
+    const whoami = document.getElementById("whoami");
+    const itemsList = document.getElementById("itemsList");
+    const addItemBtn = document.getElementById("addItemBtn");
+    const filterCategory = document.getElementById("filterCategory");
+    const searchInput = document.getElementById("search");
 
-  <script src="app.js"></script>
+    let MASTER = null;
+    let itemsUnsub = null;
+
+    // Crypto helpers using CryptoJS
+    function encryptObject(obj, pass) {
+      const json = JSON.stringify(obj);
+      return CryptoJS.AES.encrypt(json, pass).toString();
+    }
+    function decryptObject(cipherText, pass) {
+      const bytes = CryptoJS.AES.decrypt(cipherText, pass);
+      const text = bytes.toString(CryptoJS.enc.Utf8);
+      if (!text) throw new Error("فشل فك التشفير: كلمة مرور رئيسية غير صحيحة");
+      return JSON.parse(text);
+    }
+
+    // Auth
+    signupBtn.addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      if (!email || !password) return alert("الرجاء إدخال البريد الإلكتروني وكلمة المرور.");
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        alert("تم إنشاء الحساب ✅ — سجّل الدخول الآن.");
+      } catch (e) { alert(e.message); }
+    });
+
+    loginBtn.addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      if (!email || !password) return alert("الرجاء إدخال البريد الإلكتروني وكلمة المرور.");
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (e) { alert(e.message); }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      if (itemsUnsub) itemsUnsub();
+      MASTER = null;
+      await signOut(auth);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        whoami.textContent = `مرحبًا، ${user.email}`;
+        authSection.style.display = "none";
+        masterSection.style.display = "block";
+        dashboard.style.display = "none";
+        document.getElementById("master").value = "";
+        document.getElementById("master").focus();
+      } else {
+        whoami.textContent = "";
+        authSection.style.display = "block";
+        masterSection.style.display = "none";
+        dashboard.style.display = "none";
+      }
+    });
+
+    setMasterBtn.addEventListener("click", () => {
+      const m = document.getElementById("master").value;
+      if (!m || m.length < 6) return alert("أدخل كلمة مرور رئيسية لا تقل عن 6 أحرف.");
+      MASTER = m;
+      masterSection.style.display = "none";
+      dashboard.style.display = "block";
+      startLiveQuery();
+    });
+
+    addItemBtn.addEventListener("click", async () => {
+      try {
+        if (!MASTER) return alert("عيّن كلمة المرور الرئيسية أولاً.");
+        const item = {
+          title: document.getElementById("itemTitle").value.trim(),
+          username: document.getElementById("itemUser").value.trim(),
+          password: document.getElementById("itemPass").value,
+          note: document.getElementById("itemNote").value.trim(),
+          category: document.getElementById("itemCat").value,
+          createdAt: Date.now()
+        };
+        if (!item.title) return alert("اسم العنصر مطلوب.");
+        const cipher = encryptObject(item, MASTER);
+        const col = collection(db, "vault", auth.currentUser.uid, "items");
+        await addDoc(col, { cipher, ts: Date.now(), category: item.category });
+        ["itemTitle","itemUser","itemPass","itemNote"].forEach(id => document.getElementById(id).value = "");
+        alert("تم الحفظ مشفّرًا 🔒");
+      } catch (e) { alert(e.message); }
+    });
+
+    function startLiveQuery() {
+      if (itemsUnsub) itemsUnsub();
+      const col = collection(db, "vault", auth.currentUser.uid, "items");
+      const q = query(col, orderBy("ts", "desc"));
+      
+      let snapCache; // To hold the latest data snapshot
+
+      const renderItems = () => {
+        if (!snapCache) return;
+        const filter = filterCategory.value || "";
+        const qtext = searchInput.value.trim().toLowerCase();
+        itemsList.innerHTML = "";
+        snapCache.forEach(doc => {
+          try {
+            const data = decryptObject(doc.data().cipher, MASTER);
+            if (filter && data.category !== filter) return;
+            const hay = (data.title + " " + data.username + " " + (data.note||"")).toLowerCase();
+            if (qtext && !hay.includes(qtext)) return;
+            const li = document.createElement("li");
+            li.className = "item";
+            li.innerHTML = `
+              <div><strong>${escapeHTML(data.title)}</strong> <span class="meta">[${data.category}]</span></div>
+              <div class="meta">المستخدم: ${escapeHTML(data.username)}</div>
+              <div class="meta">كلمة المرور: <code title="اضغط للنسخ">${escapeHTML(data.password)}</code></div>
+              ${data.note ? `<div class="meta">ملاحظة: ${escapeHTML(data.note)}</div>` : ""}
+            `;
+            itemsList.appendChild(li);
+          } catch(err){
+            const li = document.createElement("li");
+            li.className = "item";
+            li.innerHTML = `<div class="meta">عنصر غير قابل للقراءة (تحقق من كلمة المرور الرئيسية).</div>`;
+            itemsList.appendChild(li);
+          }
+        });
+      };
+
+      itemsUnsub = onSnapshot(q, (snap) => {
+        snapCache = snap;
+        renderItems();
+      });
+
+      [filterCategory, searchInput].forEach(el => el.addEventListener("input", renderItems));
+    }
+    
+    // Event delegation for copying password
+    itemsList.addEventListener('click', function(e) {
+      if (e.target && e.target.nodeName === 'CODE') {
+        const textToCopy = e.target.textContent;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          alert('تم نسخ كلمة المرور!');
+        }).catch(err => {
+          console.error('Failed to copy: ', err);
+        });
+      }
+    });
+
+    function escapeHTML(s){ return s.replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[m])); }
+  </script>
 </body>
 </html>
